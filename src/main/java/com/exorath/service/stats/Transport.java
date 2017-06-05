@@ -53,8 +53,8 @@ public class Transport {
 
     private static Route getGetWeeklyTopRoute(Service service) {
         return (req, res) -> {
-            int since = req.queryParams().contains("amount") ? Integer.valueOf(req.queryParams("amount")) : 3;
-            return service.getTopWeeklyPlayers(new GetTopPlayersReq(req.params("gameId"), req.params("statId"), since));
+            int amount = req.queryParams().contains("amount") ? Integer.valueOf(req.queryParams("amount")) : 3;
+            return service.getTopWeeklyPlayers(new GetTopPlayersReq(req.params("gameId"), req.params("statId"), amount));
         };
     }
 

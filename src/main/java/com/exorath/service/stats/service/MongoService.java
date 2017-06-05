@@ -45,7 +45,7 @@ public class MongoService implements Service {
     public MongoService(MongoClient client, String databaseName) {
         MongoDatabase db = client.getDatabase(databaseName);
         weeklyCollection = db.getCollection("weekly");
-        statsCollection.createIndex(new Document("uuid", 1).append("statId", 1).append("gameId", 1).append("amount", -1));
+        weeklyCollection.createIndex(new Document("uuid", 1).append("statId", 1).append("gameId", 1).append("amount", -1));
         totalCollection = db.getCollection("total");
         totalCollection.createIndex(new Document("uuid", 1).append("statId", 1).append("gameId", 1).append("amount", -1));
         statsCollection = db.getCollection("stats");
