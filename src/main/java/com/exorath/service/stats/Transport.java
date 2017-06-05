@@ -35,9 +35,10 @@ public class Transport {
     private static final Gson GSON = new Gson();
 
     public static void setup(Service service, PortProvider portProvider) {
+        port(portProvider.getPort());
         get("/games/:gameId/player/:uuid/stat/:statId", getGetStatAggregateRoute(service), GSON::toJson);
         post("/games/:gameId/player/:uuid/stat/:statId", getPostStatRoute(service), GSON::toJson);
-        port(portProvider.getPort());
+
     }
 
     private static Route getGetStatAggregateRoute(Service service) {
