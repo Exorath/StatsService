@@ -18,6 +18,7 @@ package com.exorath.service.stats;
 
 import com.exorath.service.commons.portProvider.PortProvider;
 import com.exorath.service.stats.res.GetStatAggregateReq;
+import com.exorath.service.stats.res.GetTopPlayersReq;
 import com.exorath.service.stats.res.PostStatReq;
 import com.exorath.service.stats.res.Success;
 import com.google.gson.Gson;
@@ -38,6 +39,7 @@ public class Transport {
         port(portProvider.getPort());
         get("/games/:gameId/player/:uuid/stat/:statId", getGetStatAggregateRoute(service), GSON::toJson);
         post("/games/:gameId/player/:uuid/stat/:statId", getPostStatRoute(service), GSON::toJson);
+        get("/games/:gameId/stat/:statId/top/weekly", getGetWeeklyTopRoute(service), GSON::toJson);
 
     }
 
@@ -48,6 +50,13 @@ public class Transport {
         };
     }
 
+
+    private static Route getGetWeeklyTopRoute(Service service) {
+        return (req, res) -> {
+            int since = req.queryParams().contains("amount") ? Integer.valueOf(req.queryParams("amount")) : 3;
+            return service.getTopWeeklyPlayers(new GetTopPlayersReq(req.params("gameId"), req.params("statId"), since));
+        };
+    }
 
     private static Route getPostStatRoute(Service service) {
         return (req, res) -> {

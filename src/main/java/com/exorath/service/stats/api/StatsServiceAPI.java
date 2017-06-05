@@ -17,14 +17,12 @@
 package com.exorath.service.stats.api;
 
 import com.exorath.service.stats.Service;
-import com.exorath.service.stats.res.GetStatAggregateReq;
-import com.exorath.service.stats.res.GetStatAggregateRes;
-import com.exorath.service.stats.res.PostStatReq;
-import com.exorath.service.stats.res.Success;
+import com.exorath.service.stats.res.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.request.GetRequest;
+import com.mashape.unirest.request.HttpRequest;
 
 /**
  * Created by toonsev on 6/5/2017.
@@ -63,6 +61,20 @@ public class StatsServiceAPI implements Service {
             if (req.getSince() != null)
                 request.queryString("since", req.getSince());
             return GSON.fromJson(request.asString().getBody(), GetStatAggregateRes.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public GetTopPlayersRes getTopWeeklyPlayers(GetTopPlayersReq req) {
+        try {
+            HttpRequest request = Unirest.get(url("/games/{gameId}/stat/{statId}/top/weekly"))
+                    .routeParam("gameId", req.getGameId())
+                    .routeParam("statId", req.getStatId())
+                    .queryString("amount", req.getAmount());
+            return GSON.fromJson(request.asString().getBody(), GetTopPlayersRes.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

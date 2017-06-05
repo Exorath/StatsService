@@ -14,17 +14,34 @@
  *    limitations under the License.
  */
 
-package com.exorath.service.stats;
-
-import com.exorath.service.stats.res.*;
+package com.exorath.service.stats.res;
 
 /**
  * Created by toonsev on 6/5/2017.
  */
-public interface Service {
-    Success postStat(PostStatReq req);
+public class GetTopPlayersReq {
+    private String gameId;
+    private String statId;
+    private int amount;
 
-    GetStatAggregateRes getStatAggregate(GetStatAggregateReq req);
+    public GetTopPlayersReq() {
+    }
 
-    GetTopPlayersRes getTopWeeklyPlayers(GetTopPlayersReq req);
+    public GetTopPlayersReq(String gameId, String statId, int amount) {
+        this.gameId = gameId;
+        this.statId = statId;
+        this.amount = amount;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public String getStatId() {
+        return statId;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
 }

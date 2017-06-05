@@ -35,3 +35,20 @@ This will automatically be logged at the current time of the receiving service.
 | --------- | --- |
 | MONGO_URI | {mongo_uri} |
 | DB_NAME | {db name to store data} |
+
+#### /games/{gameId}/stat/{statId}/top/weekly?amount=2 [GET] - Get an agregated stat response
+
+**Response**
+```json
+{
+"topPlayers": [
+{
+  "uuid": "asd",
+  "amount": 12
+},{
+  "uuid": "asde",
+  "amount": 8
+}
+]
+}
+```

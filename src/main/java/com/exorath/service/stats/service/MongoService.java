@@ -17,26 +17,37 @@
 package com.exorath.service.stats.service;
 
 import com.exorath.service.stats.Service;
-import com.exorath.service.stats.res.GetStatAggregateReq;
-import com.exorath.service.stats.res.GetStatAggregateRes;
-import com.exorath.service.stats.res.PostStatReq;
-import com.exorath.service.stats.res.Success;
+import com.exorath.service.stats.res.*;
 import com.mongodb.MongoClient;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.mongodb.client.model.Updates.inc;
 
 /**
  * Created by toonsev on 6/5/2017.
  */
 public class MongoService implements Service {
+    private static final Long WEEK_MILLIS = TimeUnit.DAYS.toMillis(7);
+    private MongoCollection<Document> weeklyCollection;
+    private MongoCollection<Document> totalCollection;
     private MongoCollection<Document> statsCollection;
 
     public MongoService(MongoClient client, String databaseName) {
         MongoDatabase db = client.getDatabase(databaseName);
+        weeklyCollection = db.getCollection("weekly");
+        statsCollection.createIndex(new Document("uuid", 1).append("statId", 1).append("gameId", 1).append("amount", -1));
+        totalCollection = db.getCollection("total");
+        totalCollection.createIndex(new Document("uuid", 1).append("statId", 1).append("gameId", 1).append("amount", -1));
         statsCollection = db.getCollection("stats");
         statsCollection.createIndex(new Document("uuid", 1).append("time", 1).append("statId", 1).append("gameId", 1).append("flavorId", 1));
     }
@@ -44,11 +55,11 @@ public class MongoService implements Service {
     public Success postStat(PostStatReq req) {
         try {
             statsCollection.insertOne(
-                    new Document("uuid", req.getPlayerId())
+                    getBase(req.getPlayerId(), req.getGameId(), req.getStatId())
                             .append("time", System.currentTimeMillis())
-                            .append("gameId", req.getGameId())
-                            .append("statId", req.getStatId())
                             .append("amount", req.getAmount()));
+            weeklyCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()).append("week", getWeek()), inc("amount", req.getAmount()), new UpdateOptions().upsert(true));
+            totalCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()), inc("amount", req.getAmount()), new UpdateOptions().upsert(true));
             return new Success(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,8 +67,29 @@ public class MongoService implements Service {
         }
     }
 
+    @Override
+    public GetTopPlayersRes getTopWeeklyPlayers(GetTopPlayersReq req) {
+        FindIterable<Document> iterable = weeklyCollection.find(new Document("gameId", req.getGameId()).append("statId", req.getStatId()).append("week", getWeek()))
+                .limit(req.getAmount())
+                .sort(new Document("amount", -1));
+        List<TopPlayer> topPlayers = new ArrayList<>();
+        for (Document document : iterable)
+            topPlayers.add(new TopPlayer(document.getString("uuid"), document.getInteger("amount")));
+        return new GetTopPlayersRes(topPlayers);
+    }
+
+    private Document getBase(String uuid, String gameId, String statId) {
+        return new Document("uuid", uuid)
+                .append("gameId", gameId)
+                .append("statId", statId);
+    }
+
+    private long getWeek() {
+        return new Double(Math.floor(System.currentTimeMillis() / WEEK_MILLIS.doubleValue())).longValue();
+    }
+
     public GetStatAggregateRes getStatAggregate(GetStatAggregateReq req) {
-        Document innerMatch = new Document("statId", req.getStatId()).append("gameId", req.getGameId()).append("uuid", req.getPlayerId());
+        Document innerMatch = getBase(req.getPlayerId(), req.getGameId(), req.getStatId());
         if (req.getSince() != null)
             innerMatch.append("time", new Document("$gt", req.getSince()));
         Document matchDoc = new Document("$match", innerMatch);
