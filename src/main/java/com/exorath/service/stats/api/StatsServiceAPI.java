@@ -45,7 +45,8 @@ public class StatsServiceAPI implements Service {
             return GSON.fromJson(Unirest.post(url("/games/{gameId}/player/{uuid}/stat/{statId}"))
                     .routeParam("gameId", req.getGameId())
                     .routeParam("uuid", req.getPlayerId())
-                    .routeParam("statId", req.getStatId()).body(body).asString().getBody(), Success.class);
+                    .routeParam("statId", req.getStatId())
+                    .body(body.toString()).asString().getBody(), Success.class);
         } catch (Exception e) {
             e.printStackTrace();
             return new Success(e.getMessage(), -1);
