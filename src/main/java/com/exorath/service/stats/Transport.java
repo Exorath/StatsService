@@ -63,7 +63,8 @@ public class Transport {
             JsonObject body = GSON.fromJson(req.body(), JsonObject.class);
             if (!body.has("amount"))
                 return new Success("Body does not have 'amount'", -2);
-            return service.postStat(new PostStatReq(req.params("gameId"), req.params("uuid"), req.params("statId"), body.get("amount").getAsInt()));
+            String name = req.queryParams().contains("name") ? req.queryParams("name") : null;
+            return service.postStat(new PostStatReq(req.params("gameId"), name, req.params("uuid"), req.params("statId"), body.get("amount").getAsInt()));
         };
     }
 }

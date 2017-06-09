@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.request.GetRequest;
 import com.mashape.unirest.request.HttpRequest;
+import com.mashape.unirest.request.HttpRequestWithBody;
 
 /**
  * Created by toonsev on 6/5/2017.
@@ -40,11 +41,14 @@ public class StatsServiceAPI implements Service {
         try {
             JsonObject body = new JsonObject();
             body.addProperty("amount", req.getAmount());
-            return GSON.fromJson(Unirest.post(url("/games/{gameId}/player/{uuid}/stat/{statId}"))
+            HttpRequestWithBody httpRequestWithBody = Unirest.post(url("/games/{gameId}/player/{uuid}/stat/{statId}"))
                     .routeParam("gameId", req.getGameId())
                     .routeParam("uuid", req.getPlayerId())
-                    .routeParam("statId", req.getStatId())
-                    .body(body.toString()).asString().getBody(), Success.class);
+                    .routeParam("statId", req.getStatId());
+            if (req.getPlayerName() != null)
+                httpRequestWithBody.queryString("name", req.getPlayerName());
+            return
+                    GSON.fromJson(httpRequestWithBody.body(body.toString()).asString().getBody(), Success.class);
         } catch (Exception e) {
             e.printStackTrace();
             return new Success(e.getMessage(), -1);
