@@ -44,4 +44,25 @@ public class GetTopPlayersReq {
     public int getAmount() {
         return amount;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GetTopPlayersReq that = (GetTopPlayersReq) o;
+
+        if (amount != that.amount) return false;
+        if (gameId != null ? !gameId.equals(that.gameId) : that.gameId != null) return false;
+        return statId != null ? statId.equals(that.statId) : that.statId == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = gameId != null ? gameId.hashCode() : 0;
+        result = 31 * result + (statId != null ? statId.hashCode() : 0);
+        result = 31 * result + amount;
+        return result;
+    }
 }
