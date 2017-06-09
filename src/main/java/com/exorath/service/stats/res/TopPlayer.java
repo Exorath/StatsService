@@ -22,13 +22,19 @@ package com.exorath.service.stats.res;
 public class TopPlayer {
     private String uuid;
     private int amount;
+    private String name;
 
     public TopPlayer() {
     }
 
-    public TopPlayer(String uuid, int amount) {
+    public TopPlayer(String uuid, String name, int amount) {
         this.uuid = uuid;
+        this.name = name;
         this.amount = amount;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getUuid() {

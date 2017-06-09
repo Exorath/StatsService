@@ -54,12 +54,17 @@ public class MongoService implements Service {
 
     public Success postStat(PostStatReq req) {
         try {
-            statsCollection.insertOne(
-                    getBase(req.getPlayerId(), req.getGameId(), req.getStatId())
-                            .append("time", System.currentTimeMillis())
-                            .append("amount", req.getAmount()));
-            weeklyCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()).append("week", getWeek()), inc("amount", req.getAmount()), new UpdateOptions().upsert(true));
-            totalCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()), inc("amount", req.getAmount()), new UpdateOptions().upsert(true));
+            Document doc = getBase(req.getPlayerId(), req.getGameId(), req.getStatId())
+                    .append("time", System.currentTimeMillis())
+                    .append("amount", req.getAmount());
+            if (req.getPlayerName() != null)
+                doc.append("name", req.getPlayerName());
+            statsCollection.insertOne(doc);
+            Document incQuery = new Document("$inc", new Document("amount", req.getAmount()));
+            if (req.getPlayerName() != null)
+                incQuery.append("$set", new Document("name", req.getPlayerName()));
+            weeklyCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()).append("week", getWeek()), incQuery, new UpdateOptions().upsert(true));
+            totalCollection.updateOne(getBase(req.getPlayerId(), req.getGameId(), req.getStatId()), incQuery, new UpdateOptions().upsert(true));
             return new Success(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,7 +79,7 @@ public class MongoService implements Service {
                 .sort(new Document("amount", -1));
         List<TopPlayer> topPlayers = new ArrayList<>();
         for (Document document : iterable)
-            topPlayers.add(new TopPlayer(document.getString("uuid"), document.getInteger("amount")));
+            topPlayers.add(new TopPlayer(document.getString("uuid"), document.getString("name"), document.getInteger("amount")));
         return new GetTopPlayersRes(topPlayers);
     }
 

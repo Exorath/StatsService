@@ -21,17 +21,23 @@ package com.exorath.service.stats.res;
  */
 public class PostStatReq {
     private String gameId;
+    private String playerName;
     private String playerId;
     private String statId;
     private int amount;
 
     public PostStatReq() {}
 
-    public PostStatReq(String gameId, String playerId, String statId, int amount) {
+    public PostStatReq(String gameId, String playerName,String playerId, String statId, int amount) {
         this.gameId = gameId;
+        this.playerName = playerName;
         this.playerId = playerId;
         this.statId = statId;
         this.amount = amount;
+    }
+
+    public String getPlayerName() {
+        return playerName;
     }
 
     public String getGameId() {
